@@ -7,7 +7,7 @@
 apiVersion: v2
 name: bevel-scripts
 description: "Shared: Create configmaps of scripts used in Bevel"
-version: 1.0.0
+version: 1.0.1
 appVersion: "latest"
 keywords:
   - bevel
