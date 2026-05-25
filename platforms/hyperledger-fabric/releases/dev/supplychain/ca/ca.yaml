@@ -1,4 +1,4 @@
-apiVersion: helm.toolkit.fluxcd.io/v2
+﻿apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
   name: ca
@@ -26,7 +26,7 @@ spec:
       vault:
         type: hashicorp
         network: fabric
-        address: vault_addr
+        address: http://host.minikube.internal:8200
         authPath: devsupplychain
         secretEngine: secretsv2
         secretPrefix: "data/devsupplychain"
@@ -61,3 +61,4 @@ spec:
         - example1: example2
       pvc:
       deployment:
+

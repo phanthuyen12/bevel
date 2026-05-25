@@ -1,4 +1,4 @@
-apiVersion: helm.toolkit.fluxcd.io/v2
+﻿apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
   name: ca
@@ -26,7 +26,7 @@ spec:
       vault:
         type: hashicorp
         network: fabric
-        address: http://host.docker.internal:8201
+        address: http://host.minikube.internal:8200
         authPath: devwarehouse
         secretEngine: secretsv2
         secretPrefix: "data/devwarehouse"
@@ -61,3 +61,4 @@ spec:
         - example1: example2
       pvc:
       deployment:
+
