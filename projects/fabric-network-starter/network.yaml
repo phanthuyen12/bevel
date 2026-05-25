@@ -1,0 +1,222 @@
+##############################################################################################
+# Smart LMS Fabric network starter for Hyperledger Bevel
+# SPDX-License-Identifier: Apache-2.0
+##############################################################################################
+
+---
+# yaml-language-server: $schema=../../platforms/network-schema.json
+network:
+  type: fabric
+  version: 2.5.4
+  upgrade: false
+  frontend: enabled
+
+  env:
+    type: "smartlms-dev"
+    proxy: haproxy
+    retry_count: 20
+    external_dns: enabled
+    labels:
+      service: {}
+      deployment: {}
+      pvc: {}
+
+  configtx:
+    custom: false
+    folder_path: /home/bevel/build/configtx_tpl
+
+  docker:
+    url: "ghcr.io/hyperledger"
+    username: "docker_username"
+    password: "docker_password"
+
+  consensus:
+    name: raft
+
+  orderers:
+    - orderer:
+      type: orderer
+      name: orderer1
+      org_name: supplychain
+      uri: orderer1.supplychain-net.CHANGE_ME_DOMAIN:443
+
+  channels:
+    - channel:
+      consortium: SmartLMSConsortium
+      channel_name: smartlmschannel
+      channel_status: new
+      osn_creator_org:
+        name: supplychain
+      chaincodes:
+        - "smartlms"
+      orderers:
+        - supplychain
+      participants:
+        - organization:
+          name: manufacturer
+          type: creator
+          org_status: new
+          peers:
+            - peer:
+              name: peer0
+              type: anchor
+              gossipAddress: peer0.manufacturer-net.CHANGE_ME_DOMAIN:443
+              peerAddress: peer0.manufacturer-net.CHANGE_ME_DOMAIN:443
+          ordererAddress: orderer1.supplychain-net.CHANGE_ME_DOMAIN:443
+      endorsers:
+        - organization:
+          name: manufacturer
+          peers:
+            - peer:
+              name: peer0
+              corepeerAddress: peer0.manufacturer-net.CHANGE_ME_DOMAIN:443
+              certificate: "/home/bevel/build/manufacturer/server.crt"
+
+  organizations:
+    - organization:
+      name: supplychain
+      country: VN
+      state: Ho Chi Minh
+      location: Ho Chi Minh
+      subject: "O=SupplyChain,OU=Orderer,L=10.76/106.66/Ho Chi Minh,C=VN"
+      external_url_suffix: CHANGE_ME_DOMAIN
+      org_status: new
+      fabric_console: disabled
+      ca_data:
+        certificate: /home/bevel/build/supplychain/server.crt
+
+      cloud_provider: aws
+      aws:
+        access_key: "aws_access_key"
+        secret_key: "aws_secret_key"
+
+      k8s:
+        region: "local"
+        context: "CHANGE_ME_K8S_CONTEXT"
+        config_file: "/home/bevel/build/config"
+
+      vault:
+        url: "CHANGE_ME_VAULT_ADDR"
+        root_token: "CHANGE_ME_VAULT_ROOT_TOKEN"
+        secret_path: "secretsv2"
+
+      gitops:
+        git_protocol: "https"
+        git_url: "https://github.com/CHANGE_ME_GIT_USERNAME/bevel.git"
+        branch: "main"
+        release_dir: "platforms/hyperledger-fabric/releases/smartlms-dev"
+        component_dir: "platforms/hyperledger-fabric/releases/k8sComponent"
+        chart_source: "platforms/hyperledger-fabric/charts"
+        git_repo: "github.com/CHANGE_ME_GIT_USERNAME/bevel.git"
+        username: "CHANGE_ME_GIT_USERNAME"
+        password: "CHANGE_ME_GIT_TOKEN"
+        email: "CHANGE_ME_GIT_EMAIL"
+        private_key: ""
+
+      services:
+        ca:
+          name: ca
+          subject: "/C=VN/ST=Ho Chi Minh/L=Ho Chi Minh/O=SupplyChain"
+          type: ca
+          grpc:
+            port: 7054
+        consensus:
+          name: raft
+        orderers:
+          - orderer:
+            name: orderer1
+            type: orderer
+            consensus: raft
+            grpc:
+              port: 7050
+            ordererAddress: orderer1.supplychain-net.CHANGE_ME_DOMAIN:443
+
+    - organization:
+      name: manufacturer
+      country: VN
+      state: Ho Chi Minh
+      location: Ho Chi Minh
+      subject: "O=Manufacturer,OU=Peer,L=10.76/106.66/Ho Chi Minh,C=VN"
+      external_url_suffix: CHANGE_ME_DOMAIN
+      org_status: new
+      orderer_org: supplychain
+      fabric_console: disabled
+      ca_data:
+        certificate: /home/bevel/build/manufacturer/server.crt
+
+      cloud_provider: aws
+      aws:
+        access_key: "aws_access_key"
+        secret_key: "aws_secret_key"
+
+      k8s:
+        region: "local"
+        context: "CHANGE_ME_K8S_CONTEXT"
+        config_file: "/home/bevel/build/config"
+
+      vault:
+        url: "CHANGE_ME_VAULT_ADDR"
+        root_token: "CHANGE_ME_VAULT_ROOT_TOKEN"
+        secret_path: "secretsv2"
+
+      gitops:
+        git_protocol: "https"
+        git_url: "https://github.com/CHANGE_ME_GIT_USERNAME/bevel.git"
+        branch: "main"
+        release_dir: "platforms/hyperledger-fabric/releases/smartlms-dev"
+        component_dir: "platforms/hyperledger-fabric/releases/k8sComponent"
+        chart_source: "platforms/hyperledger-fabric/charts"
+        git_repo: "github.com/CHANGE_ME_GIT_USERNAME/bevel.git"
+        username: "CHANGE_ME_GIT_USERNAME"
+        password: "CHANGE_ME_GIT_TOKEN"
+        email: "CHANGE_ME_GIT_EMAIL"
+        private_key: ""
+
+      users:
+        - user:
+          identity: user1
+          attributes:
+            - key: "hf.Revoker"
+              value: "true"
+
+      services:
+        ca:
+          name: ca
+          subject: "/C=VN/ST=Ho Chi Minh/L=Ho Chi Minh/O=Manufacturer"
+          type: ca
+          grpc:
+            port: 7054
+        peers:
+          - peer:
+            name: peer0
+            type: anchor
+            gossippeeraddress: peer0.manufacturer-net:7051
+            peerAddress: peer0.manufacturer-net.CHANGE_ME_DOMAIN:443
+            cli: enabled
+            cactus_connector: disabled
+            grpc:
+              port: 7051
+            events:
+              port: 7053
+            couchdb:
+              port: 5984
+            restserver:
+              targetPort: 20001
+              port: 20001
+            expressapi:
+              targetPort: 3000
+              port: 3000
+            chaincodes:
+              - name: "smartlms"
+                version: "1"
+                sequence: "1"
+                maindirectory: "chaincode"
+                lang: "golang"
+                repository:
+                  username: "CHANGE_ME_GIT_USERNAME"
+                  password: "CHANGE_ME_GIT_TOKEN"
+                  url: "github.com/CHANGE_ME_GIT_USERNAME/bevel.git"
+                  branch: main
+                  path: "projects/fabric-network-starter/chaincode"
+                arguments: '{"Args":["Init"]}'
+                endorsements: ""
